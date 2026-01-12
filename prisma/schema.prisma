@@ -1,0 +1,166 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Villa {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  tagline     String
+  description String   @db.Text
+  
+  // Location
+  location    String
+  address     String
+  latitude    Float?
+  longitude   Float?
+  
+  // Pricing
+  pricePerNight Float
+  weekendPrice  Float?
+  cleaningFee   Float    @default(0)
+  securityDeposit Float  @default(0)
+  
+  // Capacity
+  bedrooms    Int
+  bathrooms   Int
+  maxGuests   Int
+  
+  // Features
+  amenities   String[]
+  highlights  String[]
+  houseRules  String[]
+  
+  // Images
+  images      VillaImage[]
+  coverImage  String
+  
+  // Availability
+  isAvailable Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  inquiries   Inquiry[]
+  bookings    Booking[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model VillaImage {
+  id       String @id @default(cuid())
+  url      String
+  alt      String
+  order    Int    @default(0)
+  villa    Villa  @relation(fields: [villaId], references: [id], onDelete: Cascade)
+  villaId  String
+  
+  createdAt DateTime @default(now())
+}
+
+model Inquiry {
+  id          String   @id @default(cuid())
+  
+  // Guest Info
+  name        String
+  email       String
+  phone       String
+  
+  // Booking Details
+  checkIn     DateTime
+  checkOut    DateTime
+  guests      Int
+  
+  // Additional
+  message     String?  @db.Text
+  specialRequests String? @db.Text
+  
+  // Status
+  status      InquiryStatus @default(PENDING)
+  notes       String?       @db.Text
+  
+  villa       Villa    @relation(fields: [villaId], references: [id])
+  villaId     String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([villaId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  
+  // Reference
+  bookingRef  String   @unique
+  
+  // Guest Info
+  guestName   String
+  guestEmail  String
+  guestPhone  String
+  
+  // Dates
+  checkIn     DateTime
+  checkOut    DateTime
+  nights      Int
+  guests      Int
+  
+  // Pricing
+  totalAmount Float
+  paidAmount  Float    @default(0)
+  
+  // Status
+  status      BookingStatus @default(CONFIRMED)
+  
+  villa       Villa    @relation(fields: [villaId], references: [id])
+  villaId     String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([villaId])
+  @@index([status])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      AdminRole @default(ADMIN)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum InquiryStatus {
+  PENDING
+  CONTACTED
+  CONVERTED
+  REJECTED
+  CANCELLED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+}
