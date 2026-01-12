@@ -5,8 +5,13 @@ import VillaCard from '@/components/villa/VillaCard'
 import { Button } from '@/components/ui/Button'
 import HeroSearch from '@/components/home/HeroSearch'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
-  const featuredVillas = await prisma.villa.findMany({
+  let featuredVillas: any[] = []
+
+  try {
+    featuredVillas = await prisma.villa.findMany({
     where: {
       isAvailable: true,
       isFeatured: true,
@@ -18,7 +23,11 @@ export default async function Home() {
       },
     },
     take: 3,
-  })
+    })
+  } catch (error) {
+    console.error('Database error:', error)
+    // Continue with empty array if database is not available
+  }
 
   return (
     <div className="pt-20">

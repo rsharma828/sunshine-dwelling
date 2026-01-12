@@ -2,8 +2,13 @@ import { prisma } from '@/lib/prisma'
 import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminInquiriesPage() {
-  const inquiries = await prisma.inquiry.findMany({
+  let inquiries: any[] = []
+
+  try {
+    inquiries = await prisma.inquiry.findMany({
     include: {
       villa: {
         select: {
@@ -13,7 +18,11 @@ export default async function AdminInquiriesPage() {
       },
     },
     orderBy: { createdAt: 'desc' },
-  })
+    })
+  } catch (error) {
+    console.error('Database error:', error)
+    // Continue with empty array if database is not available
+  }
 
   return (
     <div className="p-8">

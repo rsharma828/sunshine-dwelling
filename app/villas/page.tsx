@@ -44,7 +44,10 @@ export default async function VillasPage({
     where.maxGuests = { gte: guests }
   }
 
-  const villas = await prisma.villa.findMany({
+  let villas: any[] = []
+
+  try {
+    villas = await prisma.villa.findMany({
     where,
     include: {
       images: {
@@ -57,7 +60,11 @@ export default async function VillasPage({
       : searchParams.sort === 'price-high'
       ? { pricePerNight: 'desc' }
       : { createdAt: 'desc' },
-  })
+    })
+  } catch (error) {
+    console.error('Database error:', error)
+    // Continue with empty array if database is not available
+  }
 
   return (
     <div className="pt-24 pb-20">

@@ -4,8 +4,13 @@ import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminVillasPage() {
-  const villas = await prisma.villa.findMany({
+  let villas: any[] = []
+
+  try {
+    villas = await prisma.villa.findMany({
     include: {
       images: {
         orderBy: { order: 'asc' },
@@ -13,7 +18,11 @@ export default async function AdminVillasPage() {
       },
     },
     orderBy: { createdAt: 'desc' },
-  })
+    })
+  } catch (error) {
+    console.error('Database error:', error)
+    // Continue with empty array if database is not available
+  }
 
   return (
     <div className="p-8">

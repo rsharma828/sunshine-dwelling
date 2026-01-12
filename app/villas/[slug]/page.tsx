@@ -7,17 +7,27 @@ import SimilarVillas from '@/components/villa/SimilarVillas'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const villa = await prisma.villa.findUnique({
+  try {
+    const villa = await prisma.villa.findUnique({
     where: { slug: params.slug },
     select: { name: true, tagline: true, metaTitle: true, metaDescription: true },
   })
 
-  if (!villa) return {}
+    if (!villa) return {}
 
-  return {
-    title: villa.metaTitle || `${villa.name} - Luxury Villa in Goa`,
-    description: villa.metaDescription || villa.tagline,
+    return {
+      title: villa.metaTitle || `${villa.name} - Luxury Villa in Goa`,
+      description: villa.metaDescription || villa.tagline,
+    }
+  } catch (error) {
+    console.error('Database error in generateMetadata:', error)
+    return {
+      title: 'Luxury Villa in Goa',
+      description: 'Discover luxury villas in Goa',
+    }
   }
 }
 
@@ -26,16 +36,23 @@ export default async function VillaDetailPage({
 }: {
   params: { slug: string }
 }) {
-  const villa = await prisma.villa.findUnique({
+  let villa
+
+  try {
+    villa = await prisma.villa.findUnique({
     where: { slug: params.slug },
     include: {
       images: {
         orderBy: { order: 'asc' },
       },
     },
-  })
+    })
 
-  if (!villa) notFound()
+    if (!villa) notFound()
+  } catch (error) {
+    console.error('Database error:', error)
+    notFound()
+  }
 
   return (
     <div className="pt-20">

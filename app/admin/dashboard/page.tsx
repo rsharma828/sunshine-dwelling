@@ -3,27 +3,44 @@ import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboardPage() {
-  const stats = {
-    totalVillas: await prisma.villa.count(),
-    availableVillas: await prisma.villa.count({ where: { isAvailable: true } }),
-    totalInquiries: await prisma.inquiry.count(),
-    pendingInquiries: await prisma.inquiry.count({ where: { status: 'PENDING' } }),
-    totalBookings: await prisma.booking.count(),
+  let stats = {
+    totalVillas: 0,
+    availableVillas: 0,
+    totalInquiries: 0,
+    pendingInquiries: 0,
+    totalBookings: 0,
   }
 
-  const recentInquiries = await prisma.inquiry.findMany({
-    take: 5,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      villa: {
-        select: {
-          name: true,
-          slug: true,
+  let recentInquiries: any[] = []
+
+  try {
+    stats = {
+      totalVillas: await prisma.villa.count(),
+      availableVillas: await prisma.villa.count({ where: { isAvailable: true } }),
+      totalInquiries: await prisma.inquiry.count(),
+      pendingInquiries: await prisma.inquiry.count({ where: { status: 'PENDING' } }),
+      totalBookings: await prisma.booking.count(),
+    }
+
+    recentInquiries = await prisma.inquiry.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        villa: {
+          select: {
+            name: true,
+            slug: true,
+          },
         },
       },
-    },
-  })
+    })
+  } catch (error) {
+    console.error('Database error:', error)
+    // Continue with default values if database is not available
+  }
 
   return (
     <div className="p-8">

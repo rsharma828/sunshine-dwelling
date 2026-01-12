@@ -6,14 +6,18 @@ interface SimilarVillasProps {
 }
 
 export default async function SimilarVillas({ currentVillaId }: SimilarVillasProps) {
-  const currentVilla = await prisma.villa.findUnique({
-    where: { id: currentVillaId },
-    select: { location: true, pricePerNight: true },
-  })
+  let currentVilla
+  let similarVillas: any[] = []
 
-  if (!currentVilla) return null
+  try {
+    currentVilla = await prisma.villa.findUnique({
+      where: { id: currentVillaId },
+      select: { location: true, pricePerNight: true },
+    })
 
-  const similarVillas = await prisma.villa.findMany({
+    if (!currentVilla) return null
+
+    similarVillas = await prisma.villa.findMany({
     where: {
       id: { not: currentVillaId },
       isAvailable: true,
@@ -34,7 +38,11 @@ export default async function SimilarVillas({ currentVillaId }: SimilarVillasPro
       },
     },
     take: 3,
-  })
+    })
+  } catch (error) {
+    console.error('Database error in SimilarVillas:', error)
+    return null
+  }
 
   if (similarVillas.length === 0) return null
 
