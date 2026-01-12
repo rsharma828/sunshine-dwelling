@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
@@ -9,11 +9,20 @@ export default function VillaFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [filters, setFilters] = useState({
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    bedrooms: searchParams.get('bedrooms') || '',
-    location: searchParams.get('location') || '',
+    minPrice: '',
+    maxPrice: '',
+    bedrooms: '',
+    location: '',
   })
+
+  useEffect(() => {
+    setFilters({
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      bedrooms: searchParams.get('bedrooms') || '',
+      location: searchParams.get('location') || '',
+    })
+  }, [searchParams])
 
   const applyFilters = () => {
     const params = new URLSearchParams()

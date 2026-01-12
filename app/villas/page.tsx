@@ -9,6 +9,8 @@ export const metadata = {
   description: 'Discover our curated collection of luxury villas in Goa. Find the perfect villa for your dream vacation.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function VillasPage({
   searchParams,
 }: {
