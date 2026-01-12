@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 import VillaCard from '@/components/villa/VillaCard'
 import VillaFilters from '@/components/villa/VillaFilters'
 
@@ -97,7 +98,23 @@ export default async function VillasPage({
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <aside className="lg:col-span-1">
-            <VillaFilters />
+            <Suspense fallback={
+              <div className="space-y-4">
+                <div className="p-6 border border-neutral-200 rounded-lg animate-pulse">
+                  <div className="h-6 bg-neutral-200 rounded w-24 mb-4"></div>
+                  <div className="space-y-4">
+                    <div className="h-4 bg-neutral-200 rounded w-16"></div>
+                    <div className="h-10 bg-neutral-200 rounded"></div>
+                    <div className="h-4 bg-neutral-200 rounded w-20"></div>
+                    <div className="h-10 bg-neutral-200 rounded"></div>
+                    <div className="h-4 bg-neutral-200 rounded w-16"></div>
+                    <div className="h-10 bg-neutral-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            }>
+              <VillaFilters />
+            </Suspense>
           </aside>
 
           {/* Villa Grid */}
